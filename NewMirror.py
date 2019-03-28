@@ -8,9 +8,11 @@ from Tkinter import *
 #from tkinter import constants as const
 from picamera.array import PiRGBArray
 from picamera import PiCamera
-from sample import sample
 
+from time import sleep
 
+from requests import Request, Session
+from requests.exceptions import ConnectionError, Timeout, TooManyRedirects
 import time
 import datetime
 import cv2
@@ -31,19 +33,19 @@ from contextlib import contextmanager
 os.putenv('SDL_FBDEV', '/dev/fb1')
 
 # Setup the camera
-camera = PiCamera()
-camera.resolution = ( 640, 480 )
+'''camera = PiCamera()
+camera.resolution = ( 320, 240 )
 camera.framerate = 40
-rawCapture = PiRGBArray( camera, size=( 640, 480) )
+rawCapture = PiRGBArray( camera, size=( 320, 240) )
 
 # Load the cascade files for detecting faces and phones
 face_cascade = cv2.CascadeClassifier( '/home/pi/Downloads/opencv-3.3.0/data/lbpcascades/lbpcascade_frontalface.xml' )
 phone_cascade = cv2.CascadeClassifier( 'cascade.xml' )
 
 t_start = time.time()
-fps = 0
+fps = 0'''
 
-   
+from sample import FacialRec
 
 LOCALE_LOCK = threading.Lock()
 calendar_cuttoff = datetime.datetime.now()
@@ -755,8 +757,146 @@ class Launch(Frame):
             print ("Error: %s. Cannot get launch." , e)
 
         self.after(600000, self.get_events)
+
+class Crypto(Frame):
+    def __init__(self, parent, *args, **kwargs):
+        Frame.__init__(self, parent, bg='black')
+        
+        self.coin1 = ''
+        self.coin2 = ''
+        self.coin3 = ''
+        
+        self.coin1Lbl = Label(self.coin1, font=('Abel', extra_small_text_size), fg="white", bg="black")
+        self.coin1Lbl.place(x=1015, y=300, width=100, anchor=NE)
+        
+        self.coin2Lbl = Label(self.coin2, font=('Abel', extra_small_text_size), fg="white", bg="black")
+        self.coin2Lbl.place(x=1015, y=325, width=100, anchor=NE)
+        
+        self.coin3Lbl = Label(self.coin3, font=('Abel', extra_small_text_size), fg="white", bg="black")
+        self.coin3Lbl.place(x=1015, y=350, width=100, anchor=NE)
+        
+        url = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest'
+        parameters = {
+          'start': '1',
+          'limit': '3',
+          'convert': 'EUR',
+        }
+        headers = {
+          'Accepts': 'application/json',
+          'X-CMC_PRO_API_KEY': '98320f56-b874-402b-85aa-459fe110d6cb',
+        }
+
+        session = Session()
+        session.headers.update(headers)
+        #self.get_events()
+        
+        '''try:
+          response = session.get(url, params=parameters)
+          data = json.loads(response.text)
+          print(data)
+        
+        except (ConnectionError, Timeout, TooManyRedirects) as e:
+          print(e)'''
         
         
+    #def get_events(self):
+        try:
+            r = session.get(url, params=parameters)
+            data = json.loads(r.text)
+            
+            coin11 = data['data'][0]['name']
+            coin22 = data['data'][1]['name']
+            coin33 = data['data'][2]['name']
+        
+            if self.coin1Lbl != coin11:
+                    self.coin1 = coin11
+                    self.coin1Lbl.config(text=coin11)
+                    
+            if self.coin2Lbl != coin22:
+                    self.coin2 = coin22
+                    self.coin2Lbl.config(text=coin22)
+                    
+            if self.coin3Lbl != coin33:
+                    self.coin3 = coin33
+                    self.coin3Lbl.config(text=coin33)
+                    
+            
+            '''image = Image.open("assets/rocket.png")
+            image = image.resize((50, 50), Image.ANTIALIAS)
+            image = image.convert('RGB')
+            photo = ImageTk.PhotoImage(image)
+            
+            self.rocketLbl.config(image=photo)
+            self.rocketLbl.image = photo'''
+            
+        except Exception as e:
+                traceback.print_exc()
+                print ("Error: %s. Cannot get crypto." , e)
+
+        #self.after(600000, self.get_events)
+        
+class CryptoPrice(Frame):
+    def __init__(self, parent, *args, **kwargs):
+        Frame.__init__(self, parent, bg='black')
+        
+        self.coin1Price = ''
+        self.coin2Price = ''
+        self.coin3Price = ''
+        
+        self.coin1PriceLbl = Label(self.coin1Price, font=('Abel', extra_small_text_size), fg="white", bg="black", justify=RIGHT)
+        self.coin1PriceLbl.place(x=920, y=300, width=250, anchor=NE)
+        
+        self.coin2PriceLbl = Label(self.coin2Price, font=('Abel', extra_small_text_size), fg="white", bg="black")
+        self.coin2PriceLbl.place(x=920, y=325, width=250, anchor=NE)
+        
+        self.coin3PriceLbl = Label(self.coin3Price, font=('Abel', extra_small_text_size), fg="white", bg="black")
+        self.coin3PriceLbl.place(x=920, y=350, width=250, anchor=NE)
+        #self.get_events()
+        
+        url = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest'
+        parameters = {
+          'start': '1',
+          'limit': '3',
+          'convert': 'EUR',
+        }
+        headers = {
+          'Accepts': 'application/json',
+          'X-CMC_PRO_API_KEY': '98320f56-b874-402b-85aa-459fe110d6cb',
+        }
+
+        session = Session()
+        session.headers.update(headers)
+        
+    #def get_events(self):
+        try:
+            r = session.get(url, params=parameters)
+            data = json.loads(r.text)
+            
+            coin11Price = data['data'][0]['quote']['EUR']['price']
+            coin22Price = data['data'][1]['quote']['EUR']['price']
+            coin33Price = data['data'][2]['quote']['EUR']['price']
+            
+            coin11Price = 'EUR {:.2f}'.format(coin11Price)
+            coin22Price = 'EUR {:.2f}'.format(coin22Price)
+            coin33Price = 'EUR {:.2f}'.format(coin33Price)
+        
+            if self.coin1PriceLbl != coin11Price:
+                    self.coin1Price = coin11Price
+                    self.coin1PriceLbl.config(text=coin11Price)
+                    
+            if self.coin2PriceLbl != coin22Price:
+                    self.coin2Price = coin22Price
+                    self.coin2PriceLbl.config(text=coin22Price)
+                    
+            if self.coin3PriceLbl != coin33Price:
+                self.coin3Price = coin33Price
+                self.coin3PriceLbl.config(text=coin33Price)
+                    
+        except Exception as e:
+            traceback.print_exc()
+            print ("Error: %s. Cannot get crypto." , e)
+            
+            
 class FullscreenWindow:
 
     def __init__(self):
@@ -788,8 +928,8 @@ class FullscreenWindow:
         self.news = News(self.bottomFrame)
         self.news.pack(side=LEFT, anchor=S, padx=0, pady=10)
         # Facial rec
-        self.FacialRecognition = News(self.bottomFrame)
-        self.FacialRecognition.pack(side=LEFT, anchor=N, padx=100, pady=60)
+        #self.FacialRecognition = News(self.bottomFrame)
+        #self.FacialRecognition.pack(side=LEFT, anchor=N, padx=100, pady=60)
         # calender
         self.calender = Calendar(self.topFrame)
         self.calender.place(x=1015, y=150, width=250, anchor=NE)
@@ -800,6 +940,15 @@ class FullscreenWindow:
         self.traffic = Traffic(self.topFrame)
         #Launch
         self.launch = Launch(self.topFrame)
+        #Crypto
+        self.crypto = Crypto(self.topFrame)
+        self.crypto.pack(side=TOP, anchor=NE)
+        #Crypto Time
+        self.cryptoPrice = CryptoPrice(self.topFrame)
+        self.cryptoPrice.pack(side=TOP, anchor=NE)
+        #camera
+        s = FacialRec()
+        s.get_FacialRecognition()
         
         
     def toggle_fullscreen(self, event=None):
@@ -818,6 +967,7 @@ if __name__ == '__main__':
     #frame.pack(fill="both", expand=True)
     w = FullscreenWindow()
     w.tk.mainloop()
+   
     '''# a little setup to demonstrate...
     stext = st.ScrolledText(bg='white', height=10)
     # kick off our callback
