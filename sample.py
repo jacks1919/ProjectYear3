@@ -81,7 +81,7 @@ class FacialRec():
                 sleep(5)
                 camera.capture('/tmp/cameraTest.jpg')
                 #camera.stop_preview()
-                sleep(15)
+                sleep(60)
                 
                 
 
